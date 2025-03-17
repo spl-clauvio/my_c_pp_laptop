@@ -84,12 +84,14 @@ int main()
     double ypercent = 0;
     double max_y_ratio = 1;
     double linear_ratio = 1;
+    double y_ratio = 1;
+    double show_number = 20.0;
 
     double info[2][256][256] = {0};
     double last_point[2];
     double new_point[2];
     double max_num[20] = {0};
-    double y_ratio = 1;
+    double y_scale_ratio[100] = {0};
 
     int sim_times = 0;
     int RRound = 0;
@@ -109,30 +111,48 @@ int main()
     int old_coordinate[2] = {0};
     int new_coordinate[2] = {0};
     int frame_coordinate[100][2] = {0};
+    int coordinate_check[4] = {0};
 
     clock_t start, end;
+
+    for (i = 0; i < 100; i++)
+    {
+        y_scale_ratio[i] = 1;
+    }
 
     printf("Select mod :\nMod 0 : NEW file\nMod 1 : Test file\n");
     scanf("%d", &mod);
     clear();
     printf("You have chosen Mod %d\n", mod);
     Sleep(200);
+    f = 100;
 
     if (mod)
     {
-        end_time = 10;
-        f = 60;
+        end_time = 120;
+        width = 1200;
+        height = 800;
+        frame_row = 8;
+        frame_column = 12;
+        show_number = 40;
+        y_scale_ratio[0] = 0.3;
+        y_scale_ratio[1] = 0.9;
     }
     else
     {
         printf("Enter simulation time (s)\n");
         scanf("%lf", &end_time);
-        printf("Enter f (hz)\n");
-        scanf("%lf", &f);
         printf("Enter screen width height (pixel)\n");
         scanf("%d %d", &width, &height);
         printf("Enter frame row column (int)\n");
         scanf("%d %d", &frame_row, &frame_column);
+        printf("Enter show acc (int)\n");
+        scanf("%lf", &show_number);
+        for (i = 0; i < 2; i++)
+        {
+            printf("Enter max y scale ratio for NO.%d number\n", i + 1);
+            scanf("%lf", &y_scale_ratio[i]);
+        }
     }
 
     gap_time = 1000 / f;
@@ -140,7 +160,7 @@ int main()
 
     start = clock();
 
-    for (sim_time = 0, sim_times = 0; sim_time < end_time * 1000 + gap_time; sim_time += gap_time, sim_times++)
+    for (sim_time = 0, sim_times = 0, RRound = 0, tries = 0; sim_time / 1000 < end_time + gap_time / 1000; sim_time += gap_time, tries++, sim_times++)
     {
         v = g * sim_time / 1000;
         if (v > max_num[0])
@@ -152,10 +172,19 @@ int main()
         {
             max_num[1] = x;
         }
-        RRound = sim_times / 256;
-        tries = sim_times % 256;
+        // RRound = sim_times / 256;
+        // tries = sim_times % 256;
+
+        if (tries > 255)
+        {
+            RRound = RRound + 1;
+            tries = 0;
+        }
+
         info[0][RRound][tries] = v;
         info[1][RRound][tries] = x;
+
+        printf("%d %d %d %lf %lf\n", sim_times, RRound, tries, v, x);
     }
     sim_times -= 1;
 
@@ -167,7 +196,7 @@ int main()
 
     if (mod)
     {
-        width = sim_times * 2;
+        width = 1200;
         height = 800;
         x_gap = 50;
         y_gap = 50;
@@ -188,19 +217,19 @@ int main()
     }
     // 框架
 
-    step_sim = sim_times / 22.0;
+    step_sim = sim_times / show_number;
 
     for (i = 0; i < 2; i++)
     {
-        last_point[0] = 50, last_point[1] = 0;
-        y_ratio = 800 / max_num[i] * 0.8;
+        last_point[0] = x_gap, last_point[1] = 0;
+        y_ratio = y_scale_ratio[i] / max_num[i] * height;
 
-        for (j = 0; j < 22; j++)
+        for (j = 0; j < show_number; j++)
         {
-            xpercent = (j + 1) / 22.0;
+            xpercent = (j + 1) / (show_number);
             xlength = xpercent * sim_times;
 
-            new_point[0] = xpercent * width + 50;
+            new_point[0] = xpercent * width + x_gap;
             RRound = (int)floor(xlength) / 256;
             tries = (int)floor(xlength) % 256;
             linear_ratio = (xlength) - (256 * RRound + tries);
@@ -221,14 +250,23 @@ int main()
             new_point[1] = info[i][RRound][tries] + linear_ratio * (info[i][RRound_1][tries_1] - info[i][RRound][tries]);
 
             old_coordinate[0] = (int)round(last_point[0]);
-            old_coordinate[1] = (int)round(y_convert((int)floor(last_point[1] * y_ratio), 900) - 50);
+            old_coordinate[1] = (int)round(y_convert((int)floor(last_point[1] * y_ratio), height + 2 * y_gap) - y_gap);
             new_coordinate[0] = (int)round(new_point[0]);
-            new_coordinate[1] = (int)round(y_convert((int)floor(new_point[1] * y_ratio), 900) - 50);
+            new_coordinate[1] = (int)round(y_convert((int)floor(new_point[1] * y_ratio), height + 2 * y_gap) - y_gap);
+
+            {
+                coordinate_check[0] = old_coordinate[0];
+                coordinate_check[1] = old_coordinate[1];
+                coordinate_check[2] = new_coordinate[0];
+                coordinate_check[3] = new_coordinate[1];
+            }
 
             // printf("x percent : %lf RRound : %d tries : %d\n", xpercent, RRound, tries);
             // printf("%d %d \n", new_coordinate[0], new_coordinate[1]);
 
             line(old_coordinate[0], old_coordinate[1], new_coordinate[0], new_coordinate[1]);
+            printf("%d  %lf (%d,%d) , (%d,%d)\n", j, y_ratio, old_coordinate[0], old_coordinate[1], new_coordinate[0], new_coordinate[1]);
+            //  printf("%d %lf\n", j, show_number);
 
             last_point[0] = new_point[0];
             last_point[1] = new_point[1];
