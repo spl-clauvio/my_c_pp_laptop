@@ -3,19 +3,24 @@
         {
             "type": "cppbuild",
             "label": "mission2",
-            "command": "D:\\mingw64\\bin\\g++.exe",
+            //"command": "D:\\mingw64\\bin\\g++.exe",
+            "command": "D:\\TDM\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
-                "D:\\code\\C_PP\\const\\const.c",
+                //"D:\\code\\C_PP\\const\\const.c",
                 "-I",
                 "D:\\code\\C_PP\\include\\",
                 "D:\\code\\C_PP\\execute\\**",
                 "-o",
                 "D:\\code\\C_PP\\code_exe\\${fileBasenameNoExtension}.exe",
-                "-fexec-charset=GBK",
-                "-lmingw32",
+                "-L",
+                "D:\\TDM-GCC-64\\lib",
+                "-leasyx"
+
+                //"-fexec-charset=GBK",
+                //"-lmingw32",
                 
 
 
