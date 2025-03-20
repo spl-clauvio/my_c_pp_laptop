@@ -76,6 +76,8 @@ int main()
     double sleep_time = 0.0;
     double per_sim_time = 0.0;
     double per_refresh_time = 0.0;
+    double draw_time = 1;
+    double draw_wait_time = 0;
     double time_used = 0;
     double step_sim = 0;
     double step_time = 0;
@@ -87,7 +89,7 @@ int main()
     double y_ratio = 1;
     double show_number = 20.0;
 
-    double info[2][256][256] = {0};
+    double info[2][500][256] = {0};
     double last_point[2];
     double new_point[2];
     double max_num[20] = {0};
@@ -184,7 +186,7 @@ int main()
         info[0][RRound][tries] = v;
         info[1][RRound][tries] = x;
 
-        printf("%d %d %d %lf %lf\n", sim_times, RRound, tries, v, x);
+        // printf("%d %d %d %lf %lf\n", sim_times, RRound, tries, v, x);
     }
     sim_times -= 1;
 
@@ -218,6 +220,7 @@ int main()
     // 框架
 
     step_sim = sim_times / show_number;
+    draw_wait_time = draw_time / show_number * 1000;
 
     for (i = 0; i < 2; i++)
     {
@@ -261,15 +264,15 @@ int main()
                 coordinate_check[3] = new_coordinate[1];
             }
 
-            // printf("x percent : %lf RRound : %d tries : %d\n", xpercent, RRound, tries);
-            // printf("%d %d \n", new_coordinate[0], new_coordinate[1]);
+            // printf("x percent : %4.3lf RRound : %d tries : %d\n", xpercent, RRound, tries);
 
             line(old_coordinate[0], old_coordinate[1], new_coordinate[0], new_coordinate[1]);
-            printf("%d  %lf (%d,%d) , (%d,%d)\n", j, y_ratio, old_coordinate[0], old_coordinate[1], new_coordinate[0], new_coordinate[1]);
+            printf("%d %lf (%d,%d) , (%d,%d)\n", j, y_ratio, old_coordinate[0], old_coordinate[1], new_coordinate[0], new_coordinate[1]);
             //  printf("%d %lf\n", j, show_number);
 
             last_point[0] = new_point[0];
             last_point[1] = new_point[1];
+            Sleep(draw_wait_time);
         }
     }
 
